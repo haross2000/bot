@@ -1,33 +1,25 @@
-FROM python:3.11-slim
+FROM continuumio/miniconda3
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y build-essential curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install pre-built TA-Lib
-RUN curl -L -o /tmp/ta-lib-0.4.0-src.tar.gz http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz \
-    && cd /tmp \
-    && tar xvfz ta-lib-0.4.0-src.tar.gz \
-    && cd ta-lib \
-    && sed -i.bak "s|0.00000001|0.000000001|g" src/ta_func/ta_utility.h \
-    && ./configure --prefix=/usr \
-    && make \
-    && make install \
-    && cd .. \
-    && rm -rf ta-lib-0.4.0-src.tar.gz ta-lib \
-    && cd /
+# Create conda environment
+RUN conda create -n myenv python=3.11 -y
+SHELL ["conda", "run", "-n", "myenv", "/bin/bash", "-c"]
+
+# Install TA-Lib
+RUN conda install -c conda-forge ta-lib -y
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first to leverage Docker cache
+# Copy requirements first
 COPY requirements.txt .
 
 # Install Python packages
-RUN pip install --no-cache-dir numpy==1.26.2 \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
@@ -35,5 +27,8 @@ COPY . .
 # Expose port
 EXPOSE 8050
 
+# Set the default shell to bash
+SHELL ["/bin/bash", "-c"]
+
 # Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8050", "main:server"]
+CMD ["conda", "run", "--no-capture-output", "-n", "myenv", "gunicorn", "--bind", "0.0.0.0:8050", "main:server"]
