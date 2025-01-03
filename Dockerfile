@@ -3,18 +3,21 @@ FROM python:3.11-slim
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    wget \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install TA-Lib
-RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
-    tar -xvzf ta-lib-0.4.0-src.tar.gz && \
-    cd ta-lib/ && \
-    ./configure --prefix=/usr && \
-    make && \
-    make install && \
-    cd .. && \
-    rm -rf ta-lib-0.4.0-src.tar.gz ta-lib/
+# Install pre-built TA-Lib
+RUN curl -L -o /tmp/ta-lib-0.4.0-src.tar.gz http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz \
+    && cd /tmp \
+    && tar xvfz ta-lib-0.4.0-src.tar.gz \
+    && cd ta-lib \
+    && sed -i.bak "s|0.00000001|0.000000001|g" src/ta_func/ta_utility.h \
+    && ./configure --prefix=/usr \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf ta-lib-0.4.0-src.tar.gz ta-lib \
+    && cd /
 
 # Set working directory
 WORKDIR /app
@@ -23,7 +26,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python packages
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir numpy==1.26.2 \
+    && pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
