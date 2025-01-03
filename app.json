@@ -1,0 +1,13 @@
+{
+  "name": "crypto-bot",
+  "description": "Crypto Trading Bot",
+  "repository": "https://github.com/haross2000/bot",
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-apt"
+    },
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
