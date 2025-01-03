@@ -14,11 +14,17 @@ make install
 cd ..
 rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
 
-# Install numpy first
-pip install numpy==1.19.5
+# Update pip
+pip install --upgrade pip
+
+# Install wheel
+pip install wheel
+
+# Install numpy with specific version range
+pip install "numpy>=1.21.6,<1.28.0"
 
 # Install pandas
-pip install pandas==1.3.0
+pip install "pandas>=1.3.0"
 
 # Install TA-Lib python wrapper
 pip install TA-Lib==0.4.19
