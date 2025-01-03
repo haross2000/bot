@@ -268,6 +268,7 @@ app.layout = html.Div([
     ], className="container-fluid px-4")
 ], className="min-vh-100 bg-light")
 
+# تعريف نافذة المساعدة
 def create_help_modal():
     """إنشاء نافذة المساعدة"""
     return html.Div([
@@ -1377,7 +1378,12 @@ class TechnicalAnalyzer:
 
 if __name__ == '__main__':
     try:
+        port = int(os.getenv('PORT', 8050))
         logging.info("بدء تشغيل التطبيق...")
-        app.run_server(debug=True, host='127.0.0.1', port=8050)
+        app.run_server(
+            debug=False,
+            host='0.0.0.0',
+            port=port
+        )
     except Exception as e:
         logging.error(f"خطأ في تشغيل التطبيق: {str(e)}")
